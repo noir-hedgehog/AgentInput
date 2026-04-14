@@ -65,12 +65,16 @@ enum class AiProviderType(
         displayName = "MiniMax",
         defaultBaseUrl = "https://api.minimax.chat/v1",
         presetModels = listOf(
-            ModelOption("MiniMax-Text-01", "Text-01  · 最强文本"),
-            ModelOption("MiniMax-4o",      "4o  · 多模态旗舰"),
-            ModelOption("MiniMax-o4",      "o4  · 推理增强"),
+            ModelOption("MiniMax-M2.7",           "M2.7  · 最强推理 60 TPS"),
+            ModelOption("MiniMax-M2.7-highspeed","M2.7-highspeed · 极速 100 TPS"),
+            ModelOption("MiniMax-M2.5",           "M2.5  · 均衡性价比 60 TPS"),
+            ModelOption("MiniMax-M2.5-highspeed","M2.5-highspeed · 极速 100 TPS"),
+            ModelOption("MiniMax-M2.1",           "M2.1  · 编程能力"),
+            ModelOption("MiniMax-M2.1-highspeed","M2.1-highspeed · 极速"),
+            ModelOption("MiniMax-M2",             "M2  · Agent 工作流"),
         ),
         apiKeyPlaceholder = "eyJ…",
-        docUrl = "https://platform.minimax.chat"
+        docUrl = "https://platform.minimaxi.com"
     ),
 
     CUSTOM(
