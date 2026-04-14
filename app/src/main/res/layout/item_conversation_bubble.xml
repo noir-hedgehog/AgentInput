@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    对话气泡
+    user 消息：右对齐，蓝色背景
+    assistant 消息：左对齐，深色背景，支持点击重新发送
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="4dp"
+    android:paddingVertical="2dp">
+
+    <!-- user 气泡（右） -->
+    <TextView
+        android:id="@+id/tv_user_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:background="@drawable/bg_bubble_user"
+        android:textColor="#FFCDD6F4"
+        android:textSize="12sp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:maxWidth="240dp"
+        android:visibility="gone" />
+
+    <!-- assistant 气泡（左），可点击重新注入 -->
+    <TextView
+        android:id="@+id/tv_assistant_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:background="@drawable/bg_bubble_assistant"
+        android:textColor="#FFCDD6F4"
+        android:textSize="13sp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="6dp"
+        android:maxWidth="260dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
+
+</LinearLayout>

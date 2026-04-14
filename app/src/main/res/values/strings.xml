@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AI输入法</string>
+    <string name="ime_name">AI智能输入法</string>
+    <string name="settings_title">AI输入法设置</string>
+    <string name="knowledge_base_title">知识库管理</string>
+    <string name="subtype_zh">中文</string>
+    <string name="subtype_en">English</string>
+
+    <!-- Settings -->
+    <string name="api_key_hint">输入 Claude API Key</string>
+    <string name="api_key_label">API Key</string>
+    <string name="save_settings">保存设置</string>
+    <string name="settings_saved">设置已保存</string>
+
+    <!-- IME UI -->
+    <string name="hint_ai_input">告诉AI你想说什么…</string>
+    <string name="btn_generate">生成</string>
+    <string name="btn_send">发送</string>
+    <string name="btn_retry">重新生成</string>
+    <string name="btn_edit">编辑</string>
+    <string name="generating">AI生成中…</string>
+    <string name="scene_label">场景：</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_service_label">AI输入法屏幕感知</string>
+    <string name="accessibility_service_description">读取当前屏幕上的文字内容（不操控任何控件），帮助AI理解你正在查看的对话或文章，生成更贴切的回复。</string>
+
+    <!-- Knowledge Base -->
+    <string name="add_entry">添加知识条目</string>
+    <string name="entry_title_hint">标题</string>
+    <string name="entry_content_hint">内容</string>
+    <string name="entry_tags_hint">标签（逗号分隔）</string>
+    <string name="entry_scene_hint">适用场景（如：工作、聊天、邮件）</string>
+</resources>

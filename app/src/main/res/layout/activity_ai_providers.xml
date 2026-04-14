@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/ime_background">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/ime_key_background"
+            app:title="AI 引擎配置"
+            app:titleTextColor="@color/ime_key_text" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- 当前激活 Provider 提示 -->
+    <TextView
+        android:id="@+id/tv_active_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:textSize="12sp"
+        android:textColor="@color/ime_accent"
+        android:text="当前未配置任何 AI 引擎"
+        android:background="@color/ime_ai_panel_bg" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_providers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>

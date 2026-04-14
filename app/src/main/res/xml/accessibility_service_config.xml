@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    AccessibilityService 配置
+
+    - retrieveInteractiveWindows: 允许获取所有交互窗口（跨应用）
+    - typeWindowStateChanged / typeWindowContentChanged: 监听页面跳转和内容更新
+    - feedbackType: 仅做数据抓取，不给用户任何感知反馈
+-->
+<accessibility-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewFocused"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_description"
+    android:notificationTimeout="100"
+    android:settingsActivity="com.aiime.SettingsActivity" />

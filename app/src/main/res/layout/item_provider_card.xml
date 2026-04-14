@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    单个 AI Provider 配置卡片
+    ┌───────────────────────────────────────┐
+    │  ● Claude  [激活中]           [展开▼]  │
+    ├───────────────────────────────────────┤
+    │  模型：[claude-opus-4-6 ▼]            │
+    │  API Key: [sk-ant-…________]          │
+    │  (CUSTOM 时额外显示 Base URL)          │
+    │                    [设为激活] [测试]   │
+    └───────────────────────────────────────┘
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="@color/ime_key_background"
+    app:cardCornerRadius="12dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/ime_scene_tag_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ══ 标题行（始终显示）══ -->
+        <LinearLayout
+            android:id="@+id/header_row"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <!-- 激活状态点 -->
+            <TextView
+                android:id="@+id/tv_status_dot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:text="●"
+                android:textSize="10sp"
+                android:textColor="@color/ime_scene_tag_bg"
+                android:gravity="center" />
+
+            <!-- Provider 名称 -->
+            <TextView
+                android:id="@+id/tv_provider_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:textSize="15sp"
+                android:textColor="@color/ime_key_text"
+                android:textStyle="bold" />
+
+            <!-- 激活 Badge -->
+            <TextView
+                android:id="@+id/tv_active_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="使用中"
+                android:textSize="11sp"
+                android:textColor="@color/ime_background"
+                android:background="@drawable/bg_active_badge"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone" />
+
+            <!-- 展开箭头 -->
+            <ImageView
+                android:id="@+id/iv_expand_arrow"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/arrow_down_float"
+                android:contentDescription="展开" />
+        </LinearLayout>
+
+        <!-- ══ 展开区域 ══ -->
+        <LinearLayout
+            android:id="@+id/expand_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="14dp"
+            android:paddingBottom="12dp"
+            android:visibility="gone">
+
+            <!-- 分隔线 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#22FFFFFF"
+                android:layout_marginBottom="10dp" />
+
+            <!-- 模型选择 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="模型"
+                android:textSize="12sp"
+                android:textColor="#88CDD6F4" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_model"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                app:boxStrokeColor="@color/ime_accent"
+                app:hintTextColor="@color/ime_accent">
+
+                <AutoCompleteTextView
+                    android:id="@+id/actv_model"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@color/ime_key_text"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Custom 模型输入（非预设 provider 时显示） -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_custom_model"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="自定义模型 ID（如 llama-3-8b）"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@color/ime_accent"
+                android:visibility="gone">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_custom_model"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/ime_key_text"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Base URL（仅 CUSTOM 显示） -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_base_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="Base URL（含 /v1，如 https://…/v1）"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@color/ime_accent"
+                android:visibility="gone">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_base_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri"
+                    android:textColor="@color/ime_key_text"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- API Key -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_api_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="API Key"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@color/ime_accent"
+                app:passwordToggleEnabled="true">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_api_key"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:textColor="@color/ime_key_text"
+                    android:fontFamily="monospace"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Max Tokens -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="最大输出 Token 数（默认 1024）"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@color/ime_accent">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_max_tokens"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:textColor="@color/ime_key_text"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- API Key 获取链接 -->
+            <TextView
+                android:id="@+id/tv_get_api_key"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="11sp"
+                android:textColor="@color/ime_accent"
+                android:text="→ 获取 API Key"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+            <!-- 操作按钮 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:layout_marginTop="10dp">
+
+                <Button
+                    android:id="@+id/btn_test"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="测试连接"
+                    android:textSize="12sp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:textColor="@color/ime_accent"
+                    app:strokeColor="@color/ime_accent"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/btn_save_activate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="保存并激活"
+                    android:textSize="12sp"
+                    android:backgroundTint="@color/ime_generate_btn"
+                    android:textColor="@color/ime_background"
+                    style="@style/Widget.MaterialComponents.Button" />
+            </LinearLayout>
+
+            <!-- 测试结果提示 -->
+            <TextView
+                android:id="@+id/tv_test_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="12sp"
+                android:textColor="#FFA6E3A1"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

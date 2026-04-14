@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+build/
+**/build/
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keys / secrets（千万不要提交）
+*.keystore
+*.jks
+local.properties
+
+# OS
+.DS_Store
+Thumbs.db

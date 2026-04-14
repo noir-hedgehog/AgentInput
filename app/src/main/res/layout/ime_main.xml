@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    输入法主视图
+
+    ┌─────────────────────────────────────────┐
+    │  场景栏（包名·场景类型·屏幕上下文状态）       │
+    ├─────────────────────────────────────────┤
+    │  对话历史气泡列表（多轮，可滚动，最大高度限制） │
+    ├─────────────────────────────────────────┤
+    │  意图输入栏 + 生成按钮                     │
+    ├─────────────────────────────────────────┤
+    │  键盘容器（系统/自定义键盘）                 │
+    └─────────────────────────────────────────┘
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ime_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/ime_background">
+
+    <!-- ═══ AI 面板 ═══ -->
+    <LinearLayout
+        android:id="@+id/ai_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/ime_ai_panel_bg"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="4dp">
+
+        <!-- 场景栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_scene_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="@color/ime_accent"
+                android:text="场景：检测中…"
+                android:fontFamily="monospace"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+            <!-- AccessibilityService 上下文状态图标 -->
+            <TextView
+                android:id="@+id/tv_a11y_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:text="●"
+                android:textSize="10sp"
+                android:textColor="#88888888"
+                android:contentDescription="无障碍服务状态" />
+
+            <!-- 清除对话 -->
+            <ImageButton
+                android:id="@+id/btn_clear_conversation"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_delete"
+                android:contentDescription="清除对话"
+                android:visibility="gone" />
+
+            <!-- 折叠/展开 -->
+            <ImageButton
+                android:id="@+id/btn_toggle_ai"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/arrow_up_float"
+                android:contentDescription="切换AI面板" />
+        </LinearLayout>
+
+        <!-- ═══ 可折叠区域开始 ═══ -->
+        <LinearLayout
+            android:id="@+id/ai_collapsible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 对话历史气泡列表，最大高度 200dp，内容少时自适应 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_conversation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="200dp"
+                android:nestedScrollingEnabled="true"
+                android:overScrollMode="ifContentScrolls"
+                android:visibility="gone"
+                android:layout_marginTop="4dp" />
+
+            <!-- 生成中指示条 -->
+            <LinearLayout
+                android:id="@+id/generating_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginVertical="4dp"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:indeterminateTint="@color/ime_accent" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/generating"
+                    android:textSize="12sp"
+                    android:textColor="@color/ime_accent" />
+            </LinearLayout>
+
+            <!-- 最新 AI 输出（流式实时显示，Complete 后转入气泡列表） -->
+            <TextView
+                android:id="@+id/tv_ai_streaming"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="@color/ime_key_text"
+                android:background="@drawable/bg_output_card"
+                android:padding="8dp"
+                android:layout_marginTop="4dp"
+                android:visibility="gone" />
+
+            <!-- 操作按钮行 -->
+            <LinearLayout
+                android:id="@+id/action_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:layout_marginTop="4dp"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btn_retry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/btn_retry"
+                    android:textSize="12sp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:textColor="@color/ime_accent"
+                    app:strokeColor="@color/ime_accent"
+                    android:layout_marginEnd="4dp" />
+
+                <Button
+                    android:id="@+id/btn_send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/btn_send"
+                    android:textSize="12sp"
+                    android:backgroundTint="@color/ime_send_btn"
+                    android:textColor="@color/ime_background"
+                    style="@style/Widget.MaterialComponents.Button" />
+            </LinearLayout>
+
+            <!-- 意图输入栏 -->
+            <LinearLayout
+                android:id="@+id/ai_input_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="2dp">
+
+                <EditText
+                    android:id="@+id/et_ai_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_ai_input"
+                    android:textSize="14sp"
+                    android:textColor="@color/ime_key_text"
+                    android:textColorHint="#88CDD6F4"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="7dp"
+                    android:maxLines="3"
+                    android:inputType="textMultiLine|textAutoCorrect" />
+
+                <Button
+                    android:id="@+id/btn_generate"
+                    android:layout_width="56dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/btn_generate"
+                    android:textSize="13sp"
+                    android:backgroundTint="@color/ime_generate_btn"
+                    android:textColor="@color/ime_background"
+                    style="@style/Widget.MaterialComponents.Button" />
+            </LinearLayout>
+
+        </LinearLayout>
+        <!-- ═══ 可折叠区域结束 ═══ -->
+
+    </LinearLayout>
+
+    <!-- 分隔线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#22FFFFFF" />
+
+    <!-- 键盘容器 -->
+    <FrameLayout
+        android:id="@+id/keyboard_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
