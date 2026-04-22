@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="ime_yuyan_name">语燕输入法</string>
-    <string name="ime_yuyan_name_debug">语燕输入法</string>
+    <string name="ime_yuyan_name_debug">语燕AI输入法（调试）</string>
     <!--设置页面-->
     <string name="setting_ime_sdk">输入法设置</string>
     <string name="setting_ime_input">输入设置</string>
@@ -12,6 +12,42 @@
     <string name="setting_ime_keyboard_show">键盘效果</string>
     <string name="setting_ime_keyboard_height">键盘调节</string>
     <string name="ime_settings_voice">语音识别</string>
+    <string name="voice_input_enable">启用语音转文字</string>
+    <string name="ai_candidate_enable">启用 AI 候选建议</string>
+    <string name="a11y_context_enable">启用无障碍上下文</string>
+    <string name="screenshot_understanding_enable">启用截图理解（Minimax）</string>
+    <string name="gui_action_execution_enable">启用 GUI 代理执行</string>
+    <string name="auto_execute_low_risk">低风险动作自动执行</string>
+    <string name="ai_model_name">AI 模型名称</string>
+    <string name="ai_candidate_length_range">AI候选每条字数范围（如 50-100）</string>
+    <string name="ai_cover_mode">AI候选覆盖整个输入框</string>
+    <string name="ai_commit_hide_native_candidates">提交AI候选后清空原生候选</string>
+    <string name="ai_candidate_endpoint">AI 候选服务地址</string>
+    <string name="ai_screenshot_endpoint">AI 截图理解服务地址</string>
+    <string name="ai_api_key">AI API Key</string>
+    <string name="not_configured">未配置</string>
+    <string name="ai_debug_logs">AI 联调日志</string>
+    <string name="ai_debug_refresh">刷新日志</string>
+    <string name="ai_debug_clear">清空日志</string>
+    <string name="ai_debug_channel">最近调用类型</string>
+    <string name="ai_debug_url">最近请求地址</string>
+    <string name="ai_debug_status">最近状态码</string>
+    <string name="ai_debug_elapsed">最近耗时</string>
+    <string name="ai_debug_error">最近错误</string>
+    <string name="ai_debug_response">最近响应片段</string>
+    <string name="ai_debug_prompt">最近请求 Prompt</string>
+    <string name="ai_debug_screenshot_path">最近截图文件</string>
+    <string name="ai_debug_screenshot_result">最近图片理解结果</string>
+    <string name="ai_debug_updated">最近更新时间</string>
+    <string name="ai_debug_empty">暂无联调记录，请先触发一次 AI 请求</string>
+    <string name="ai_generate">AI生成</string>
+    <string name="ai_status_not_configured">AI未配置</string>
+    <string name="ai_status_connected">AI已连接</string>
+    <string name="ai_status_last_error">AI错误</string>
+    <string name="ai_open_accessibility_settings">打开系统无障碍设置</string>
+    <string name="ai_open_accessibility_settings_failed">无法打开系统无障碍设置，请手动前往系统设置</string>
+    <string name="ai_accessibility_service_name">语燕AI输入法屏幕识别服务</string>
+    <string name="ai_accessibility_service_desc">用于读取当前界面文本与截图，支持AI候选上下文理解</string>
     <string name="ime_settings_handwriting">手写设置</string>
     <string name="keypopup_input_settings">按键气泡</string>
     <string name="long_press_timeout">按键长按灵敏度</string>

@@ -84,6 +84,30 @@ abstract class ManagedPreferenceCategory(
         return pref
     }
 
+    protected fun text(
+        @StringRes
+        title: Int,
+        key: String,
+        defaultValue: String = "",
+        isPassword: Boolean = false,
+        @StringRes
+        summary: Int? = null,
+        enableUiOn: (() -> Boolean)? = null
+    ): ManagedPreference.PString {
+        val pref = ManagedPreference.PString(sharedPreferences, key, defaultValue)
+        val ui = ManagedPreferenceUi.EditTextString(
+            title = title,
+            key = key,
+            defaultValue = defaultValue,
+            isPassword = isPassword,
+            summary = summary,
+            enableUiOn = enableUiOn,
+        )
+        pref.register()
+        ui.registerUi()
+        return pref
+    }
+
     protected fun twinInt(
         @StringRes
         title: Int,

@@ -200,8 +200,61 @@ class AppPrefs(private val sharedPreferences: SharedPreferences) {
         )
     }
 
-    inner class Voice : ManagedPreferenceCategory(R.string.setting_ime_input, sharedPreferences) {
-//        val titleChinese = category(R.string.chinese_input_setting)
+    inner class Voice : ManagedPreferenceCategory(R.string.ime_settings_voice, sharedPreferences) {
+        val enableVoiceInput = switch(R.string.voice_input_enable, "voice_input_enable", true)
+        val enableAiCandidates = switch(R.string.ai_candidate_enable, "ai_candidate_enable", true)
+        val modelName = text(
+            R.string.ai_model_name,
+            "ai_model_name",
+            "MiniMax-M2.7"
+        ) { enableAiCandidates.getValue() }
+        val aiCandidateLengthRange = text(
+            R.string.ai_candidate_length_range,
+            "ai_candidate_length_range",
+            "50-100"
+        ) { enableAiCandidates.getValue() }
+        val aiCoverMode = switch(
+            R.string.ai_cover_mode,
+            "ai_cover_mode",
+            false
+        ) { enableAiCandidates.getValue() }
+        val aiCommitHideNativeCandidates = switch(
+            R.string.ai_commit_hide_native_candidates,
+            "ai_commit_hide_native_candidates",
+            true
+        ) { enableAiCandidates.getValue() }
+        val enableA11yContext = switch(R.string.a11y_context_enable, "a11y_context_enable", true)
+        val candidateEndpoint = text(
+            R.string.ai_candidate_endpoint,
+            "ai_candidate_endpoint",
+            ""
+        ) { enableAiCandidates.getValue() }
+        val screenshotEndpoint = text(
+            R.string.ai_screenshot_endpoint,
+            "ai_screenshot_endpoint",
+            ""
+        ) { enableAiCandidates.getValue() && enableScreenshotUnderstanding.getValue() }
+        val apiKey = text(
+            R.string.ai_api_key,
+            "ai_api_key",
+            "",
+            isPassword = true
+        ) { enableAiCandidates.getValue() }
+        val enableScreenshotUnderstanding = switch(
+            R.string.screenshot_understanding_enable,
+            "screenshot_understanding_enable",
+            true
+        )
+        val enableGuiActionExecution = switch(
+            R.string.gui_action_execution_enable,
+            "gui_action_execution_enable",
+            false
+        )
+        val autoExecuteLowRisk = switch(
+            R.string.auto_execute_low_risk,
+            "auto_execute_low_risk",
+            false
+        ) { enableGuiActionExecution.getValue() }
     }
 
     inner class Other : ManagedPreferenceCategory(R.string.setting_ime_other, sharedPreferences) {

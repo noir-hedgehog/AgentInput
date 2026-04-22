@@ -498,6 +498,8 @@ class InputView(context: Context, private val service: ImeService) : LifecycleRe
         val candidate = DecodingInfo.getCandidate(candId)
         if (candidate?.comment == "📋") {
             commitDecInfoText(candidate.text)
+        } else if (candidate?.comment == "🤖") {
+            commitAiCandidate(candidate.text)
         } else {
             val choice = DecodingInfo.chooseDecodingCandidate(candId)
             if (DecodingInfo.isEngineFinish || DecodingInfo.isAssociate) {
@@ -560,6 +562,14 @@ class InputView(context: Context, private val service: ImeService) : LifecycleRe
             DataBaseKT.instance.clipboardDao().deleteAllExceptKeep()
             (KeyboardManager.instance.currentContainer as? ClipBoardContainer)?.showClipBoardView(SkbMenuMode.ClipBoard)
         }
+
+        override fun onClickAiGenerate() {
+            service.triggerAiCandidatesNow()
+        }
+
+        override fun onClickAiSuggestionText(text: String) {
+            commitAiCandidate(text)
+        }
     }
 
     fun onSettingsMenuClick(skbMenuMode: SkbMenuMode, extra: Phrase? = null) {
@@ -593,6 +603,22 @@ class InputView(context: Context, private val service: ImeService) : LifecycleRe
         val list = symbols.map { CandidateListItem("📋", it) }.toTypedArray()
         DecodingInfo.cacheCandidates(list)
         DecodingInfo.isAssociate = true
+    }
+
+    fun showAiSymbols(symbols: Array<String>) {
+        mImeState = ImeState.STATE_INPUT
+        val list = symbols.map { CandidateListItem("🤖", it) }.toTypedArray()
+        DecodingInfo.cacheCandidates(list)
+        DecodingInfo.isAssociate = true
+    }
+
+    fun showAiSuggestionPanel(suggestions: List<String>) {
+        if (suggestions.isEmpty()) return
+        mSkbCandidatesBarView.showAiSuggestionPopup(suggestions)
+    }
+
+    fun canShowExternalCandidates(): Boolean {
+        return !isAddPhrases && DecodingInfo.isCandidatesListEmpty
     }
 
     fun requestHideSelf() = service.requestHideSelf(0)
@@ -641,6 +667,21 @@ class InputView(context: Context, private val service: ImeService) : LifecycleRe
 
     private fun commitTextEditMenu(id: Int?) {
         id?.let { service.commitTextEditMenu(it) }
+    }
+
+    private fun commitAiCandidate(resultText: String?) {
+        resultText ?: return
+        val voicePrefs = appPrefs.voice
+        if (voicePrefs.aiCoverMode.getValue()) {
+            service.replaceAllText(resultText)
+        } else {
+            service.commitText(StringUtils.converted2FlowerTypeface(resultText))
+        }
+        service.finishComposingText()
+        if (voicePrefs.aiCommitHideNativeCandidates.getValue()) {
+            resetToIdleState()
+            KeyboardManager.instance.switchKeyboard()
+        }
     }
 
     fun performEditorAction(editorAction: Int) = service.performEditorAction(editorAction)

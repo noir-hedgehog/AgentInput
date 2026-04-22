@@ -1,6 +1,8 @@
 package com.yuyan.imemodule.view
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
@@ -8,8 +10,10 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -26,6 +30,7 @@ import com.yuyan.imemodule.data.menuSkbFunsPreset
 import com.yuyan.imemodule.data.theme.ThemeManager
 import com.yuyan.imemodule.database.DataBaseKT
 import com.yuyan.imemodule.entity.SkbFunItem
+import com.yuyan.imemodule.agent.AgentDebugLogStore
 import com.yuyan.imemodule.prefs.AppPrefs
 import com.yuyan.imemodule.prefs.behavior.KeyboardOneHandedMod
 import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
@@ -51,6 +56,8 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
     private lateinit var mComposingView: TextView // 组成字符串的View，用于显示输入的拼音。
     private lateinit var mRVCandidates: RecyclerView    //候选词列表
     private lateinit var mIvMenuSetting: ImageView
+    private lateinit var mIvMenuSettingHolder: FrameLayout
+    private lateinit var mAiStatusDot: View
     private lateinit var mLlContainer: LinearLayout
     private lateinit var mFlowerType: TextView
     private lateinit var mCandidatesAdapter: CandidatesBarAdapter
@@ -58,6 +65,7 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
     private lateinit var mCandidatesMenuAdapter: CandidatesMenuAdapter
     private lateinit var candidatesData: LinearLayout //候选词视图
     private var activeCandNo:Int = 0
+    private var aiSuggestionPopup: PopupWindow? = null
 
     fun initialize(cvListener: CandidateViewListener) {
         mCvListener = cvListener
@@ -154,6 +162,25 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
                 isEnabled = true
                 setOnClickListener { mCvListener.onClickMenu(SkbMenuMode.SettingsMenu) }
             }
+            mIvMenuSettingHolder = FrameLayout(context).apply {
+                isClickable = true
+                isFocusable = true
+                setOnClickListener { mCvListener.onClickMenu(SkbMenuMode.SettingsMenu) }
+            }
+            mAiStatusDot = View(context).apply {
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(Color.RED)
+                }
+            }
+            mIvMenuSettingHolder.addView(mIvMenuSetting)
+            mIvMenuSettingHolder.addView(
+                mAiStatusDot,
+                FrameLayout.LayoutParams(dp(8), dp(8), Gravity.TOP or Gravity.END).apply {
+                    topMargin = dp(2)
+                    marginEnd = dp(2)
+                }
+            )
             mLlContainer = LinearLayout(context).apply {
                 gravity = Gravity.CENTER_VERTICAL
             }
@@ -209,7 +236,7 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
             mMenuRightArrowBtn.setOnClickListener { _: View ->
                 mCvListener.onClickMenu(SkbMenuMode.CloseSKB)
             }
-            mCandidatesMenuContainer.addView(mIvMenuSetting)
+            mCandidatesMenuContainer.addView(mIvMenuSettingHolder)
             mCandidatesMenuContainer.addView(mLlContainer)
             mCandidatesMenuContainer.addView(mRVContainerMenu)
             mCandidatesMenuContainer.addView(mMenuRightArrowBtn)
@@ -220,11 +247,13 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
         }
         var menuHeight = (instance.heightForCandidatesArea * 0.8).toInt()
         mFlowerType.textSize = instance.candidateTextSize
-        mIvMenuSetting.layoutParams = LinearLayout.LayoutParams(menuHeight, menuHeight, 0f).apply { marginStart = dp(10) }
+        mIvMenuSetting.layoutParams = FrameLayout.LayoutParams(menuHeight, menuHeight).apply { gravity = Gravity.CENTER }
+        mIvMenuSettingHolder.layoutParams = LinearLayout.LayoutParams(menuHeight, menuHeight, 0f).apply { marginStart = dp(10) }
         mMenuRightArrowBtn.layoutParams = LinearLayout.LayoutParams(menuHeight, menuHeight, 0f).apply { marginEnd = dp(10) }
         mLlContainer.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, menuHeight,0f)
         mRVContainerMenu.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, menuHeight, 1f)
         mCandidatesMenuAdapter.notifyChanged()  // 点击下拉菜单后，需要刷新菜单栏
+        updateAiStatus()
     }
 
     private fun onClickMenu(skbMenuMode: SkbMenuMode, view: View?) {
@@ -243,8 +272,51 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
             }
             popupMenu.show()
         } else {
+            if (skbMenuMode == SkbMenuMode.TextEdit) {
+                mCvListener.onClickAiGenerate()
+                return
+            }
             mCvListener.onClickMenu(skbMenuMode)
         }
+    }
+
+    fun showAiSuggestionPopup(suggestions: List<String>) {
+        if (suggestions.isEmpty()) return
+        aiSuggestionPopup?.dismiss()
+        val container = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(ThemeManager.activeTheme.barColor)
+            setPadding(dp(8), dp(8), dp(8), dp(8))
+        }
+        suggestions.take(5).forEach { suggestion ->
+            val row = TextView(context).apply {
+                text = suggestion
+                setTextColor(ThemeManager.activeTheme.keyTextColor)
+                setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15f)
+                setPadding(dp(8), dp(10), dp(8), dp(10))
+                setOnClickListener {
+                    mCvListener.onClickAiSuggestionText(suggestion)
+                    aiSuggestionPopup?.dismiss()
+                }
+            }
+            container.addView(row, LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        }
+        aiSuggestionPopup = PopupWindow(container, instance.skbWidth, LayoutParams.WRAP_CONTENT, true).apply {
+            isOutsideTouchable = true
+            elevation = dp(8).toFloat()
+        }
+        post {
+            val widthSpec = View.MeasureSpec.makeMeasureSpec(instance.skbWidth, View.MeasureSpec.EXACTLY)
+            val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            container.measure(widthSpec, heightSpec)
+            val popupHeight = if (container.measuredHeight > 0) container.measuredHeight else heightForPopupFallback()
+            val yOffset = -(popupHeight + height + dp(6))
+            aiSuggestionPopup?.showAsDropDown(this, 0, yOffset)
+        }
+    }
+
+    private fun heightForPopupFallback(): Int {
+        return (instance.heightForCandidatesArea * 0.8f).toInt()
     }
 
     /**
@@ -268,9 +340,16 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
             val barMenus = DataBaseKT.instance.skbFunDao().getALlBarMenu()
             for (item in barMenus) {
                 val skbMenuMode = SkbMenuMode.decode(item.name)
+                if (skbMenuMode == SkbMenuMode.Emojicon || skbMenuMode == SkbMenuMode.Emoticon) {
+                    continue
+                }
                 val skbFunItem = menuSkbFunsPreset[skbMenuMode]
                 if (skbFunItem != null) {
-                    mFunItems.add(skbFunItem)
+                    if (skbMenuMode == SkbMenuMode.TextEdit) {
+                        mFunItems.add(SkbFunItem(resources.getString(R.string.ai_generate), skbFunItem.funImgResource, skbFunItem.skbMenuMode))
+                    } else {
+                        mFunItems.add(skbFunItem)
+                    }
                 }
             }
             mCandidatesMenuAdapter.items = mFunItems
@@ -283,6 +362,7 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
         mCandidatesAdapter.activeCandidates(activeCandNo)
         mCandidatesAdapter.notifyChanged()
         mCandidatesMenuAdapter.notifyChanged()
+        updateAiStatus()
     }
 
     /**
@@ -371,5 +451,19 @@ class CandidatesBar(context: Context?, attrs: AttributeSet?) : RelativeLayout(co
         mCandidatesAdapter.notifyChanged()
         mCandidatesMenuAdapter.notifyChanged()
         mFlowerType.setTextColor(textColor)
+        updateAiStatus()
+    }
+
+    private fun updateAiStatus() {
+        val voice = AppPrefs.getInstance().voice
+        val hasApiKey = voice.apiKey.getValue().isNotBlank()
+        val statusSnapshot = AgentDebugLogStore.read()
+        val dotColor = when {
+            !hasApiKey -> Color.RED
+            statusSnapshot.statusCode in 200..299 -> Color.parseColor("#4CAF50")
+            statusSnapshot.statusCode != 0 -> Color.parseColor("#F5A623")
+            else -> Color.RED
+        }
+        (mAiStatusDot.background as? GradientDrawable)?.setColor(dotColor)
     }
 }

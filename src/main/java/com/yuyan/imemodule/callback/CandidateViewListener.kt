@@ -12,4 +12,6 @@ interface CandidateViewListener {
     fun onClickMenu(skbMenuMode: SkbMenuMode)  //选择设置菜单
     fun onClickClearCandidate()  //清空候选词
     fun onClickClearClipBoard() //清空剪切板
+    fun onClickAiGenerate() // 手动触发AI候选生成
+    fun onClickAiSuggestionText(text: String) // 手动AI建议项点击
 }

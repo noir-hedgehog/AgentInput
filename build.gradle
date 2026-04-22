@@ -15,7 +15,7 @@ static def getAppGitHead() {
 }
 
 static def getAppBuildTime() {
-    return "git log -1 --pretty=%ai".execute().text.trim()
+    return new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("GMT+8"))
 }
 
 
@@ -41,6 +41,8 @@ android {
         buildConfigField "String", "versionName", "\"${versionNameDate()}\""
         buildConfigField "String", "AppCommitHead", "\"${getAppGitHead()}\""
         buildConfigField "String", "AppBuildTime", "\"${getAppBuildTime()}\""
+        buildConfigField "String", "AI_CANDIDATE_ENDPOINT", "\"${project.findProperty("AI_CANDIDATE_ENDPOINT") ?: ""}\""
+        buildConfigField "String", "AI_SCREENSHOT_ENDPOINT", "\"${project.findProperty("AI_SCREENSHOT_ENDPOINT") ?: ""}\""
     }
 
     //多渠道打包: app中多渠道配置要一致

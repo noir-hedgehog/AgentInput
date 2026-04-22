@@ -142,6 +142,29 @@ class ClipBoardContainer(context: Context, inputView: InputView) : BaseContainer
         mRVSymbolsView.setAdapter(adapter)
     }
 
+    fun showAiSuggestionView(suggestions: List<String>) {
+        itemMode = SkbMenuMode.Phrases
+        mRVSymbolsView.setHasFixedSize(true)
+        val aiContents = suggestions.map { Clipboard(it) }.toMutableList()
+        mRVSymbolsView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        val viewParent = mTVLable?.parent
+        if (viewParent != null) {
+            (viewParent as ViewGroup).removeView(mTVLable)
+        }
+        if (aiContents.isEmpty()) {
+            this.addView(mTVLable, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        }
+        val adapter = ClipBoardAdapter(context, aiContents)
+        mRVSymbolsView.setAdapter(null)
+        mRVSymbolsView.setOnItemClickListener { _: View?, position: Int ->
+            inputView.responseLongKeyEvent(Pair(PopupMenuMode.Text, aiContents[position].content))
+            KeyboardManager.instance.switchKeyboard()
+        }
+        mRVSymbolsView.setSwipeMenuCreator { _: SwipeMenu, _: SwipeMenu, _: Int -> }
+        mRVSymbolsView.setOnItemMenuClickListener { _: SwipeMenuBridge, _: Int -> }
+        mRVSymbolsView.adapter = adapter
+    }
+
     private val mHashMapSymbols = HashMap<Int, Int>() //候选词索引列数对应表
     private fun calculateColumn(data : MutableList<Clipboard>) {
         mHashMapSymbols.clear()

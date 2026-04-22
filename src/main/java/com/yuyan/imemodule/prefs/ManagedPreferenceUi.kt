@@ -101,6 +101,37 @@ abstract class ManagedPreferenceUi<T : Preference>(
         }
     }
 
+    class EditTextString(
+        @StringRes
+        val title: Int,
+        key: String,
+        val defaultValue: String,
+        val isPassword: Boolean = false,
+        @StringRes
+        val summary: Int? = null,
+        enableUiOn: (() -> Boolean)? = null
+    ) : ManagedPreferenceUi<EditTextPreference>(key, enableUiOn) {
+        override fun createUi(context: Context) = EditTextPreference(context).apply {
+            key = this@EditTextString.key
+            isIconSpaceReserved = false
+            isSingleLineTitle = false
+            setTitle(this@EditTextString.title)
+            setDialogTitle(this@EditTextString.title)
+            setDefaultValue(this@EditTextString.defaultValue)
+            this@EditTextString.summary?.let { setSummary(it) }
+            summaryProvider = Preference.SummaryProvider<EditTextPreference> { pref ->
+                val value = pref.text.orEmpty()
+                if (value.isBlank()) {
+                    context.getString(com.yuyan.imemodule.R.string.not_configured)
+                } else if (isPassword) {
+                    "********"
+                } else {
+                    value
+                }
+            }
+        }
+    }
+
     class SeekBarInt(
         @StringRes
         val title: Int,

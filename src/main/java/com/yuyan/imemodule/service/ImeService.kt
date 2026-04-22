@@ -2,6 +2,7 @@ package com.yuyan.imemodule.service
 
 import android.content.res.Configuration
 import android.inputmethodservice.InputMethodService
+import android.os.Build
 import android.os.SystemClock
 import android.text.InputType
 import android.view.KeyCharacterMap
@@ -9,14 +10,17 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.ExtractedTextRequest
 import com.yuyan.imemodule.data.emojicon.YuyanEmojiCompat
 import com.yuyan.imemodule.data.theme.Theme
 import com.yuyan.imemodule.data.theme.ThemeManager.OnThemeChangeListener
 import com.yuyan.imemodule.data.theme.ThemeManager.addOnChangedListener
 import com.yuyan.imemodule.data.theme.ThemeManager.onSystemDarkModeChange
 import com.yuyan.imemodule.data.theme.ThemeManager.removeOnChangedListener
+import com.yuyan.imemodule.agent.ImeAiCoordinator
 import com.yuyan.imemodule.prefs.AppPrefs.Companion.getInstance
 import com.yuyan.imemodule.prefs.behavior.SkbMenuMode
+import com.yuyan.imemodule.speech.SpeechInputController
 import com.yuyan.imemodule.singleton.EnvironmentSingleton
 import com.yuyan.imemodule.utils.KeyboardLoaderUtil
 import com.yuyan.imemodule.keyboard.InputView
@@ -37,6 +41,9 @@ import splitties.bitflags.hasFlag
 class ImeService : InputMethodService() {
     private var isWindowShown = false // 键盘窗口是否已显示
     private lateinit var mInputView: InputView
+    private var currentEditorInfo: EditorInfo? = null
+    private lateinit var aiCoordinator: ImeAiCoordinator
+    private lateinit var speechInputController: SpeechInputController
     private val onThemeChangeListener = OnThemeChangeListener { _: Theme? -> if (::mInputView.isInitialized) mInputView.updateTheme() }
     private val clipboardUpdateContent = getInstance().internal.clipboardUpdateContent
     private val clipboardUpdateContentListener = ManagedPreference.OnChangeListener<String> { _, value ->
@@ -55,6 +62,25 @@ class ImeService : InputMethodService() {
     }
     override fun onCreate() {
         super.onCreate()
+        aiCoordinator = ImeAiCoordinator(
+            inputConnectionProvider = { currentInputConnection },
+            editorInfoProvider = { currentEditorInfo ?: currentInputEditorInfo },
+            onSuggestionsReady = { candidates, manual -> showAiCandidates(candidates, manual) },
+        )
+        speechInputController = SpeechInputController(
+            context = this,
+            onPartial = { partial ->
+                if (partial.isNotBlank()) {
+                    setComposingText(partial)
+                }
+            },
+            onFinal = { result ->
+                if (result.isNotBlank()) {
+                    commitText(result)
+                    finishComposingText()
+                }
+            },
+        )
         addOnChangedListener(onThemeChangeListener)
         clipboardUpdateContent.registerOnChangeListener(clipboardUpdateContentListener)
     }
@@ -66,16 +92,21 @@ class ImeService : InputMethodService() {
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         YuyanEmojiCompat.setEditorInfo(attribute)
+        currentEditorInfo = attribute
         super.onStartInput(attribute, restarting)
     }
 
     override fun onStartInputView(editorInfo: EditorInfo, restarting: Boolean) {
         if (::mInputView.isInitialized)mInputView.onStartInputView(editorInfo, restarting)
+        currentEditorInfo = editorInfo
+        aiCoordinator.onSelectionOrTextMayChanged()
         super.onStartInputView(editorInfo, restarting)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        aiCoordinator.destroy()
+        speechInputController.destroy()
         removeOnChangedListener(onThemeChangeListener)
         clipboardUpdateContent.unregisterOnChangeListener(clipboardUpdateContentListener)
     }
@@ -140,6 +171,7 @@ class ImeService : InputMethodService() {
     override fun onUpdateSelection(oldSelStart: Int, oldSelEnd: Int, newSelStart: Int, newSelEnd: Int, candidatesStart: Int, candidatesEnd: Int) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
         if (::mInputView.isInitialized) mInputView.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesEnd)
+        aiCoordinator.onSelectionOrTextMayChanged()
     }
 
     override fun onWindowShown() {
@@ -153,6 +185,30 @@ class ImeService : InputMethodService() {
         isWindowShown = false
         if(::mInputView.isInitialized) mInputView.onWindowHidden()
         super.onWindowHidden()
+    }
+
+    fun startVoiceInput() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            speechInputController.start()
+        }
+    }
+
+    fun stopVoiceInput() {
+        speechInputController.stop()
+    }
+
+    private fun showAiCandidates(candidates: List<String>, manualTrigger: Boolean) {
+        if (!::mInputView.isInitialized || !mInputView.isShown) return
+        if (manualTrigger) {
+            mInputView.showAiSuggestionPanel(candidates)
+            return
+        }
+        if (!mInputView.canShowExternalCandidates()) return
+        mInputView.showAiSymbols(candidates.toTypedArray())
+    }
+
+    fun triggerAiCandidatesNow() {
+        aiCoordinator.requestNow()
     }
 
     /**
@@ -249,5 +305,14 @@ class ImeService : InputMethodService() {
 
     fun setSelection(start: Int, end: Int) {
         currentInputConnection.setSelection(start, end)
+    }
+
+    fun replaceAllText(text: String) {
+        val extracted = currentInputConnection.getExtractedText(ExtractedTextRequest(), 0)
+        val existing = extracted?.text?.toString().orEmpty()
+        if (existing.isNotEmpty()) {
+            currentInputConnection.setSelection(0, existing.length)
+        }
+        currentInputConnection.commitText(StringUtils.converted2FlowerTypeface(text), 1)
     }
 }
